@@ -34,9 +34,8 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
         url: str = req_body['api_url']
     except:
         print("Could not find 'api_url' in the request body")
-
         return func.HttpResponse(
-            f"Did not find the api_url",
+            "Could not find 'api_url' in the request body",
             status_code=400
         )
 
@@ -44,12 +43,26 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
     headers = {"Authorization": f"Bearer {os.environ['eventbriteToken']}"}
     # Append "attendees" to the Eventbrite API URL simplify getting the attendees from the Order
     url += "attendees"
-    r = httpx.get(url, headers=headers)
+    try:
+        r = httpx.get(url, headers=headers)
+    except:
+        print(f"Could not reach Eventbrite api url {url}")
+        return func.HttpResponse(
+            f"Could not reach Eventbrite api url {url}",
+            status_code=400
+        )
 
     # Get the emails of the attendees in the Eventbrite Order
     emails: List[str] = []
-    for attendee in r.json()['attendees']:
-        emails.append(attendee['profile']['email'])
+    try:
+        for attendee in r.json()['attendees']:
+            emails.append(attendee['profile']['email'])
+    except KeyError:
+        print(f"Could not find ['attendees'] in the response from the Eventbrite api for the url {url}")
+        return func.HttpResponse(
+            f"Could not find ['attendees'] in the response from the Eventbrite api for the url {url}",
+            status_code=400
+        )
 
     # Async post the emails
     asyncio.run(post_emails(emails))
