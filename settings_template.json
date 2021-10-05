@@ -1,0 +1,7 @@
+{
+    "OS Environment Variables": {
+        "[LOCATION]": "[AZURE FUNCTION APPLICATION SETTINGS OR SIMILAR]",
+        "powerAutomateURL": "[POWER AUTOMATE HTTP REQUEST URL]",
+        "powerAutomateSig": "[PARAMETER FROM POWER AUTOMATE HTTP REQUEST URL]"
+    }
+}
