@@ -19,6 +19,7 @@ async def post_emails(emails: List[str]) -> None:
                 # Would make this async if I though people were adding more than one attendee per order
                 p = await client.post(p_url, json=data, params=p_params)
                 p.raise_for_status()
+                logging.info(f"Added {email} to the Team.")
             except:
                 # Could catch errors in adding people to the Team
                 # a 5xx would be caught here if the attendee's email address wasn't in the company's Active Directory
@@ -29,6 +30,18 @@ def main(req: func.HttpRequest) -> func.HttpResponse:
 
     # Catch the webhook sent by Eventbrite for a new Order being placed
     logging.info('Python HTTP trigger function processed a request.')
+
+    # Check to see if this is just an Eventbrite test
+    try:
+        if req.get_json()['config']['action'] == "test":
+            return func.HttpResponse(
+                f"Endpoint test successful",
+                status_code=200
+            )
+    except:
+        pass
+
+    # Get the Eventbrite API URL where more info can be found about the order
     try:
         req_body: List = req.get_json()
         url: str = req_body['api_url']
